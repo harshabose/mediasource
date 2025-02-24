@@ -3,6 +3,7 @@ package mediasource
 import (
 	"context"
 	"fmt"
+
 	"github.com/pion/webrtc/v4"
 	"github.com/pion/webrtc/v4/pkg/media"
 )
