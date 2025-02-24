@@ -3,29 +3,32 @@ package mediasource
 import (
 	"context"
 	"fmt"
-	"time"
-
 	"github.com/pion/webrtc/v4"
 	"github.com/pion/webrtc/v4/pkg/media"
-
-	"mediasource/internal"
 )
 
 // NO BUFFER IMPLEMENTATION
 
 type Track struct {
-	track  *webrtc.TrackLocalStaticSample
-	stream *internal.Stream
-	ctx    context.Context
+	track     *webrtc.TrackLocalStaticSample
+	rtpSender *webrtc.RTPSender
+	stream    *Stream
+	priority  Priority
+	ctx       context.Context
 }
 
-func CreateLocalTrack(ctx context.Context, stream *internal.Stream, options ...Option) (*Track, error) {
-	track := &Track{stream: stream, ctx: ctx}
+func CreateTrack(ctx context.Context, peerConnection *webrtc.PeerConnection, options ...TrackOption) (*Track, error) {
+	var err error
+	track := &Track{ctx: ctx}
 
 	for _, option := range options {
 		if err := option(track); err != nil {
 			return nil, err
 		}
+	}
+
+	if track.rtpSender, err = peerConnection.AddTrack(track.track); err != nil {
+		return nil, err
 	}
 
 	return track, nil
@@ -49,11 +52,7 @@ func (track *Track) loop() {
 	var (
 		sample *media.Sample = nil
 		err    error         = nil
-		ticker *time.Ticker  = nil
 	)
-
-	ticker = time.NewTicker(time.Second)
-	defer ticker.Stop()
 
 loop:
 	for {

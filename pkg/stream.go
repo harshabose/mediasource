@@ -1,8 +1,8 @@
-package internal
+package mediasource
 
 import (
 	"context"
-	"fmt"
+	"mediasource/internal"
 	"time"
 
 	"github.com/asticode/go-astiav"
@@ -10,13 +10,6 @@ import (
 	"github.com/harshabose/tools/buffer/pkg"
 	"github.com/pion/webrtc/v4/pkg/media"
 )
-
-type Options struct {
-	DemuxerOptions []transcode.DemuxerOption
-	DecoderOptions []transcode.DecoderOption
-	FilterOptions  []transcode.FilterOption
-	EncoderOptions []transcode.EncoderOption
-}
 
 type Stream struct {
 	demuxer *transcode.Demuxer
@@ -27,38 +20,21 @@ type Stream struct {
 	ctx     context.Context
 }
 
-func CreateStream(ctx context.Context, containerAddress string, options *Options) (*Stream, error) {
+func CreateStream(ctx context.Context, options ...StreamOption) (*Stream, error) {
 	var (
-		demuxer *transcode.Demuxer
-		decoder *transcode.Decoder
-		filter  *transcode.Filter
-		encoder *transcode.Encoder
-		err     error
+		err    error
+		stream *Stream = &Stream{ctx: ctx}
 	)
 
-	if demuxer, err = transcode.CreateDemuxer(ctx, containerAddress, options.DemuxerOptions...); err != nil {
-		return nil, err
-	}
-	if decoder, err = transcode.CreateDecoder(ctx, demuxer, append([]transcode.DecoderOption{demuxer.GetDecoderContextOptions()}, options.DecoderOptions...)...); err != nil {
-		return nil, err
-	}
-	if filter, err = transcode.CreateFilter(ctx, decoder, transcode.VideoFilters, decoder.GetSrcFilterContextOptions(), transcode.WithDefaultVideoFilterContentOptions); err != nil {
-		return nil, err
-	}
-	if encoder, err = transcode.CreateEncoder(ctx, filter, transcode.WithLowLatencyVideoEncoderSetting); err != nil {
-		return nil, err
+	for _, option := range options {
+		if err = option(stream); err != nil {
+			return nil, err
+		}
 	}
 
-	fmt.Println("started encoder with settings:")
+	stream.buffer = buffer.CreateChannelBuffer(ctx, stream.encoder.GetFPS()*3, internal.CreateSamplePool())
 
-	return &Stream{
-		demuxer: demuxer,
-		decoder: decoder,
-		filter:  filter,
-		encoder: encoder,
-		buffer:  buffer.CreateChannelBuffer(ctx, encoder.GetFPS()*3, CreateSamplePool()),
-		ctx:     ctx,
-	}, nil
+	return stream, nil
 }
 
 func (stream *Stream) Start() {

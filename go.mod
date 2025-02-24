@@ -1,6 +1,11 @@
 module mediasource
 
-go 1.23
+go 1.23.3
+
+require (
+	github.com/harshabose/simple_webrtc_comm/transcode v0.0.0
+	github.com/harshabose/tools/buffer v0.0.0
+)
 
 require (
 	github.com/google/uuid v1.6.0 // indirect
@@ -24,8 +29,6 @@ require (
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
-	github.com/harshabose/simple_webrtc_comm/transcode v0.0.0
-	github.com/harshabose/tools/buffer v0.0.0
 )
 
 replace (
