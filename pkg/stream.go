@@ -2,13 +2,14 @@ package mediasource
 
 import (
 	"context"
-	"mediasource/internal"
 	"time"
 
 	"github.com/asticode/go-astiav"
 	"github.com/harshabose/simple_webrtc_comm/transcode/pkg"
 	"github.com/harshabose/tools/buffer/pkg"
 	"github.com/pion/webrtc/v4/pkg/media"
+
+	"mediasource/internal"
 )
 
 type Stream struct {
@@ -32,7 +33,9 @@ func CreateStream(ctx context.Context, options ...StreamOption) (*Stream, error)
 		}
 	}
 
-	stream.buffer = buffer.CreateChannelBuffer(ctx, stream.encoder.GetFPS()*3, internal.CreateSamplePool())
+	if stream.buffer == nil {
+		stream.buffer = buffer.CreateChannelBuffer(ctx, 256, internal.CreateSamplePool())
+	}
 
 	return stream, nil
 }
@@ -88,17 +91,13 @@ func (stream *Stream) WaitForSample() chan *media.Sample {
 	return stream.buffer.GetChannel()
 }
 
-func (stream *Stream) GetParameterSets() ([]byte, []byte) {
-	return stream.encoder.GetSPS(), stream.encoder.GetPPS()
-}
-
 func (stream *Stream) packetToSample(packet *astiav.Packet) *media.Sample {
 	sample := stream.buffer.Generate()
 
 	sample.Data = packet.Data()
 	sample.Timestamp = time.Now().UTC()
-	sample.Duration = time.Second / time.Duration(stream.encoder.GetFPS())
-	sample.PacketTimestamp = uint32(float64(packet.Pts()) * float64(stream.encoder.GetVideoTimeBase()) * float64(time.Second))
+	sample.Duration = time.Second / stream.encoder.GetDuration()
+	sample.PacketTimestamp = uint32(float64(packet.Pts()) * (stream.encoder.GetVideoTimeBase().Float64()) * float64(time.Second))
 	sample.PrevDroppedPackets = 0
 	sample.Metadata = nil
 	sample.RTPHeaders = nil
