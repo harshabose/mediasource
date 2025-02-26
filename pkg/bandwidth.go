@@ -3,9 +3,11 @@ package mediasource
 import (
 	"context"
 	"errors"
-	"github.com/pion/interceptor/pkg/cc"
+	"fmt"
 	"sync"
 	"time"
+
+	"github.com/pion/interceptor/pkg/cc"
 )
 
 type consumer struct {
@@ -35,6 +37,8 @@ func (be *bandwidthEstimator) SetConsumer(id string, setChannel func(chan int64)
 
 	be.consumers[id] = &consumer{channel: make(chan int64), track: track}
 	setChannel(be.consumers[id].channel)
+
+	fmt.Printf("consumer set with id: %s\n", id)
 
 	return nil
 }
@@ -73,7 +77,10 @@ func (be *bandwidthEstimator) estimate() {
 			continue
 		}
 		select {
-		case consumer.channel <- int64(float64(totalBitrate) * float64(consumer.track.priority) / float64(totalPriority)):
+		default:
+			bitrate := int64(float64(totalBitrate) * float64(consumer.track.priority) / float64(totalPriority))
+			consumer.channel <- bitrate
+			// fmt.Printf("sent bitrate to consumer with id: %s and bitrate %d\n", label, bitrate)
 		}
 	}
 }

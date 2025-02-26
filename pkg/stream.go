@@ -47,7 +47,7 @@ func (stream *Stream) Start() {
 	stream.filter.Start()
 	stream.encoder.Start()
 	go stream.loop()
-	fmt.Printf("media source stream started")
+	fmt.Println("media source stream started")
 }
 
 func (stream *Stream) loop() {

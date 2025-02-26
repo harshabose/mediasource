@@ -41,13 +41,13 @@ func (track *Track) GetTrack() *webrtc.TrackLocalStaticSample {
 
 func (track *Track) Start() {
 	if track.track == nil {
-		fmt.Printf("no remote track set yet. Skipping...")
+		fmt.Println("no remote track set yet. Skipping...")
 		return
 	}
 
 	track.stream.Start()
 	go track.loop()
-	fmt.Printf("media source track started")
+	fmt.Println("media source track started")
 }
 
 func (track *Track) loop() {

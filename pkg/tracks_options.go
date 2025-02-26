@@ -2,6 +2,8 @@ package mediasource
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/pion/interceptor/pkg/cc"
 	"github.com/pion/interceptor/pkg/flexfec"
 	"github.com/pion/interceptor/pkg/gcc"
@@ -11,7 +13,6 @@ import (
 	"github.com/pion/interceptor/pkg/twcc"
 	"github.com/pion/sdp/v3"
 	"github.com/pion/webrtc/v4"
-	"time"
 )
 
 type TracksOption = func(*Tracks) error
@@ -169,7 +170,6 @@ func WithBandwidthEstimatorInterceptor(initialBitrate int, interval time.Duratio
 		)
 
 		tracks.bwEstimator = &bandwidthEstimator{ctx: tracks.ctx, consumers: make(map[string]*consumer), interval: interval}
-		tracks.bwEstimator.Start()
 
 		if congestionController, err = cc.NewInterceptor(func() (cc.BandwidthEstimator, error) {
 			return gcc.NewSendSideBWE(gcc.SendSideBWEInitialBitrate(initialBitrate))
@@ -178,6 +178,7 @@ func WithBandwidthEstimatorInterceptor(initialBitrate int, interval time.Duratio
 		}
 
 		congestionController.OnNewPeerConnection(func(id string, estimator cc.BandwidthEstimator) {
+			fmt.Printf("got bitrate estimator for peer connection with label: %s\n", id)
 			tracks.bwEstimator.estimator = estimator
 			tracks.bwEstimator.Start()
 		})
