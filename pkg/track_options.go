@@ -42,10 +42,9 @@ func WithOpusTrack(samplerate uint32, channelLayout uint16, id string) TrackOpti
 
 func WithStream(options ...StreamOption) TrackOption {
 	return func(track *Track) error {
-		for _, option := range options {
-			if err := option(track.stream); err != nil {
-				return err
-			}
+		var err error
+		if track.stream, err = CreateStream(track.ctx, options...); err != nil {
+			return err
 		}
 		return nil
 	}

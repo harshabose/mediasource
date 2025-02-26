@@ -1,4 +1,4 @@
-module mediasource
+module github.com/harshabose/simple_webrtc_comm/mediasource
 
 go 1.23.3
 

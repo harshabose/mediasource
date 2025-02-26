@@ -48,6 +48,15 @@ func (tracks *Tracks) CreateTrack(peerConnection *webrtc.PeerConnection, options
 	return nil
 }
 
+func (tracks *Tracks) GetTrack(id string) (*Track, error) {
+	track, exists := tracks.tracks[id]
+	if !exists {
+		return nil, errors.New("track does not exits")
+	}
+
+	return track, nil
+}
+
 func (tracks *Tracks) StartTrack(id string) {
 	if track, ok := tracks.tracks[id]; ok {
 		track.Start()

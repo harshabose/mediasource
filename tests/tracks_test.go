@@ -10,7 +10,7 @@ import (
 	"github.com/pion/interceptor"
 	"github.com/pion/webrtc/v4"
 
-	"mediasource/pkg"
+	"github.com/harshabose/simple_webrtc_comm/mediasource/pkg"
 )
 
 func TestTracks(t *testing.T) {

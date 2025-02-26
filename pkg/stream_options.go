@@ -5,7 +5,7 @@ import (
 	"github.com/harshabose/simple_webrtc_comm/transcode/pkg"
 	"github.com/harshabose/tools/buffer/pkg"
 
-	"mediasource/internal"
+	"github.com/harshabose/simple_webrtc_comm/mediasource/internal"
 )
 
 type StreamOption = func(*Stream) error

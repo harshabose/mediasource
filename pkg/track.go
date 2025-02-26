@@ -47,6 +47,7 @@ func (track *Track) Start() {
 
 	track.stream.Start()
 	go track.loop()
+	fmt.Printf("media source track started")
 }
 
 func (track *Track) loop() {

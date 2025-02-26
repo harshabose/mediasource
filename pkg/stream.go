@@ -2,6 +2,7 @@ package mediasource
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/asticode/go-astiav"
@@ -9,7 +10,7 @@ import (
 	"github.com/harshabose/tools/buffer/pkg"
 	"github.com/pion/webrtc/v4/pkg/media"
 
-	"mediasource/internal"
+	"github.com/harshabose/simple_webrtc_comm/mediasource/internal"
 )
 
 type Stream struct {
@@ -46,6 +47,7 @@ func (stream *Stream) Start() {
 	stream.filter.Start()
 	stream.encoder.Start()
 	go stream.loop()
+	fmt.Printf("media source stream started")
 }
 
 func (stream *Stream) loop() {
