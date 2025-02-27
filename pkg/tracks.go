@@ -33,19 +33,19 @@ func CreateTracks(ctx context.Context, mediaEngine *webrtc.MediaEngine, intercep
 	return tracks, nil
 }
 
-func (tracks *Tracks) CreateTrack(peerConnection *webrtc.PeerConnection, options ...TrackOption) error {
+func (tracks *Tracks) CreateTrack(peerConnection *webrtc.PeerConnection, options ...TrackOption) (*Track, error) {
 	var (
 		track *Track
 		err   error
 	)
 	if track, err = CreateTrack(tracks.ctx, peerConnection, append(options, withBandwidthControl(tracks.bwEstimator))...); err != nil {
-		return err
+		return nil, err
 	}
 	if _, exists := tracks.tracks[track.track.ID()]; exists {
-		return errors.New("track already exists")
+		return nil, errors.New("track already exists")
 	}
 	tracks.tracks[track.track.ID()] = track
-	return nil
+	return track, nil
 }
 
 func (tracks *Tracks) GetTrack(id string) (*Track, error) {
