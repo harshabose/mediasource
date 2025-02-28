@@ -32,6 +32,8 @@ func CreateTrack(ctx context.Context, peerConnection *webrtc.PeerConnection, opt
 		return nil, err
 	}
 
+	fmt.Println("added track to peer connection")
+
 	return track, nil
 }
 
@@ -68,6 +70,7 @@ loop:
 				continue loop
 			}
 			track.stream.PutBack(sample)
+			fmt.Println("send samples to remote")
 		}
 	}
 }

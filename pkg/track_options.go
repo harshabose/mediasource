@@ -1,12 +1,41 @@
 package mediasource
 
 import (
+	"fmt"
+
 	"github.com/pion/webrtc/v4"
+)
+
+type PacketisationMode uint8
+
+const (
+	PacketisationMode0 PacketisationMode = 0
+	PacketisationMode1 PacketisationMode = 1
+	PacketisationMode2 PacketisationMode = 2
+)
+
+type ProfileLevel string
+
+const (
+	ProfileLevelBaseline21 ProfileLevel = "420015" // Level 2.1 (480p)
+	ProfileLevelBaseline31 ProfileLevel = "42001f" // Level 3.1 (720p)
+	ProfileLevelBaseline41 ProfileLevel = "420029" // Level 4.1 (1080p)
+	ProfileLevelBaseline42 ProfileLevel = "42002a" // Level 4.2 (2K)
+
+	ProfileLevelMain21 ProfileLevel = "4D0015" // Level 2.1
+	ProfileLevelMain31 ProfileLevel = "4D001f" // Level 3.1
+	ProfileLevelMain41 ProfileLevel = "4D0029" // Level 4.1
+	ProfileLevelMain42 ProfileLevel = "4D002a" // Level 4.2
+
+	ProfileLevelHigh21 ProfileLevel = "640015" // Level 2.1
+	ProfileLevelHigh31 ProfileLevel = "64001f" // Level 3.1
+	ProfileLevelHigh41 ProfileLevel = "640029" // Level 4.1
+	ProfileLevelHigh42 ProfileLevel = "64002a" // Level 4.2
 )
 
 type TrackOption = func(*Track) error
 
-func WithH264Track(clockrate uint32, id string) TrackOption {
+func WithH264Track(id string, clockrate uint32, packetisationMode PacketisationMode, profileLevel ProfileLevel) TrackOption {
 	return func(track *Track) error {
 		var (
 			err error = nil
@@ -15,7 +44,7 @@ func WithH264Track(clockrate uint32, id string) TrackOption {
 		if track.track, err = webrtc.NewTrackLocalStaticSample(webrtc.RTPCodecCapability{
 			MimeType:    webrtc.MimeTypeH264,
 			ClockRate:   clockrate,
-			SDPFmtpLine: "level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=420029",
+			SDPFmtpLine: fmt.Sprintf("level-asymmetry-allowed=1;packetization-mode=%d;profile-level-id=%s", packetisationMode, profileLevel),
 		}, id, "webrtc"); err != nil {
 			return err
 		}
@@ -23,16 +52,24 @@ func WithH264Track(clockrate uint32, id string) TrackOption {
 	}
 }
 
-func WithOpusTrack(samplerate uint32, channelLayout uint16, id string) TrackOption {
+type StereoType uint8
+
+const (
+	StereoMono StereoType = StereoType(0)
+	StereoDual StereoType = StereoType(1)
+)
+
+func WithOpusTrack(id string, samplerate uint32, channelLayout uint16, stereo StereoType) TrackOption {
 	return func(track *Track) error {
 		var (
 			err error = nil
 		)
 
 		if track.track, err = webrtc.NewTrackLocalStaticSample(webrtc.RTPCodecCapability{
-			MimeType:  webrtc.MimeTypeOpus,
-			ClockRate: samplerate,
-			Channels:  channelLayout,
+			MimeType:    webrtc.MimeTypeOpus,
+			ClockRate:   samplerate,
+			Channels:    channelLayout,
+			SDPFmtpLine: fmt.Sprintf("minptime=10;useinbandfec=1;stereo=%d", stereo),
 		}, id, "webrtc"); err != nil {
 			return err
 		}

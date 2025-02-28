@@ -4,24 +4,19 @@ import (
 	"context"
 	"errors"
 
-	"github.com/pion/interceptor"
 	"github.com/pion/webrtc/v4"
 )
 
 type Tracks struct {
-	bwEstimator         *bandwidthEstimator
-	mediaEngine         *webrtc.MediaEngine
-	interceptorRegistry *interceptor.Registry
-	tracks              map[string]*Track
-	ctx                 context.Context
+	bwEstimator *bandwidthEstimator
+	tracks      map[string]*Track
+	ctx         context.Context
 }
 
-func CreateTracks(ctx context.Context, mediaEngine *webrtc.MediaEngine, interceptorRegistry *interceptor.Registry, options ...TracksOption) (*Tracks, error) {
+func CreateTracks(ctx context.Context, options ...TracksOption) (*Tracks, error) {
 	tracks := &Tracks{
-		tracks:              make(map[string]*Track),
-		mediaEngine:         mediaEngine,
-		interceptorRegistry: interceptorRegistry,
-		ctx:                 ctx,
+		tracks: make(map[string]*Track),
+		ctx:    ctx,
 	}
 
 	for _, option := range options {
@@ -38,7 +33,10 @@ func (tracks *Tracks) CreateTrack(peerConnection *webrtc.PeerConnection, options
 		track *Track
 		err   error
 	)
-	if track, err = CreateTrack(tracks.ctx, peerConnection, append(options, withBandwidthControl(tracks.bwEstimator))...); err != nil {
+	// if track, err = CreateTrack(tracks.ctx, peerConnection, append(options, withBandwidthControl(tracks.bwEstimator))...); err != nil {
+	// 	return nil, err
+	// }
+	if track, err = CreateTrack(tracks.ctx, peerConnection, options...); err != nil {
 		return nil, err
 	}
 	if _, exists := tracks.tracks[track.track.ID()]; exists {
