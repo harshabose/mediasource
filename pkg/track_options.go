@@ -1,6 +1,7 @@
 package mediasource
 
 import (
+	"encoding/base64"
 	"fmt"
 
 	"github.com/pion/webrtc/v4"
@@ -79,6 +80,12 @@ func WithStream(options ...StreamOption) TrackOption {
 		if track.stream, err = CreateStream(track.ctx, options...); err != nil {
 			return err
 		}
+		sps, pps := track.stream.encoder.GetParameterSets()
+		spsBase64 := base64.StdEncoding.EncodeToString(sps)
+		ppsBase64 := base64.StdEncoding.EncodeToString(pps)
+
+		track.rtcCapability.SDPFmtpLine = track.rtcCapability.SDPFmtpLine + fmt.Sprintf(";sprop-parameter-sets=%s,%s", spsBase64, ppsBase64)
+
 		return nil
 	}
 }

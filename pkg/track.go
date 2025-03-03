@@ -19,7 +19,7 @@ type Track struct {
 	ctx           context.Context
 }
 
-func CreateTrack(ctx context.Context, id string, peerConnection *webrtc.PeerConnection, options ...TrackOption) (*Track, error) {
+func CreateTrack(ctx context.Context, label string, peerConnection *webrtc.PeerConnection, options ...TrackOption) (*Track, error) {
 	var err error
 	track := &Track{ctx: ctx, rtcCapability: &webrtc.RTPCodecCapability{}}
 
@@ -29,7 +29,7 @@ func CreateTrack(ctx context.Context, id string, peerConnection *webrtc.PeerConn
 		}
 	}
 
-	if track.track, err = webrtc.NewTrackLocalStaticSample(*track.rtcCapability, id, "webrtc"); err != nil {
+	if track.track, err = webrtc.NewTrackLocalStaticSample(*track.rtcCapability, label, "webrtc"); err != nil {
 		return nil, err
 	}
 
