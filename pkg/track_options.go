@@ -35,19 +35,15 @@ const (
 
 type TrackOption = func(*Track) error
 
-func WithH264Track(id string, clockrate uint32, packetisationMode PacketisationMode, profileLevel ProfileLevel) TrackOption {
+func WithH264Track(clockrate uint32, packetisationMode PacketisationMode, profileLevel ProfileLevel) TrackOption {
 	return func(track *Track) error {
-		var (
-			err error = nil
-		)
 
-		if track.track, err = webrtc.NewTrackLocalStaticSample(webrtc.RTPCodecCapability{
-			MimeType:    webrtc.MimeTypeH264,
-			ClockRate:   clockrate,
-			SDPFmtpLine: fmt.Sprintf("level-asymmetry-allowed=1;packetization-mode=%d;profile-level-id=%s", packetisationMode, profileLevel),
-		}, id, "webrtc"); err != nil {
-			return err
-		}
+		track.rtcCapability.MimeType = webrtc.MimeTypeH264
+		track.rtcCapability.ClockRate = clockrate
+		track.rtcCapability.Channels = 0
+		track.rtcCapability.RTCPFeedback = []webrtc.RTCPFeedback{}
+		track.rtcCapability.SDPFmtpLine = track.rtcCapability.SDPFmtpLine + fmt.Sprintf("level-asymmetry-allowed=1;packetization-mode=%d;profile-level-id=%s", packetisationMode, profileLevel)
+
 		return nil
 	}
 }

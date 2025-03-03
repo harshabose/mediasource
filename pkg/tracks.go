@@ -28,7 +28,7 @@ func CreateTracks(ctx context.Context, options ...TracksOption) (*Tracks, error)
 	return tracks, nil
 }
 
-func (tracks *Tracks) CreateTrack(peerConnection *webrtc.PeerConnection, options ...TrackOption) (*Track, error) {
+func (tracks *Tracks) CreateTrack(label string, peerConnection *webrtc.PeerConnection, options ...TrackOption) (*Track, error) {
 	var (
 		track *Track
 		err   error
@@ -36,7 +36,7 @@ func (tracks *Tracks) CreateTrack(peerConnection *webrtc.PeerConnection, options
 	// if track, err = CreateTrack(tracks.ctx, peerConnection, append(options, withBandwidthControl(tracks.bwEstimator))...); err != nil {
 	// 	return nil, err
 	// }
-	if track, err = CreateTrack(tracks.ctx, peerConnection, options...); err != nil {
+	if track, err = CreateTrack(tracks.ctx, label, peerConnection, options...); err != nil {
 		return nil, err
 	}
 	if _, exists := tracks.tracks[track.track.ID()]; exists {

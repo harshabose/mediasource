@@ -11,21 +11,26 @@ import (
 // NO BUFFER IMPLEMENTATION
 
 type Track struct {
-	track     *webrtc.TrackLocalStaticSample
-	rtpSender *webrtc.RTPSender
-	stream    *Stream
-	priority  Priority
-	ctx       context.Context
+	track         *webrtc.TrackLocalStaticSample
+	rtcCapability *webrtc.RTPCodecCapability
+	rtpSender     *webrtc.RTPSender
+	stream        *Stream
+	priority      Priority
+	ctx           context.Context
 }
 
-func CreateTrack(ctx context.Context, peerConnection *webrtc.PeerConnection, options ...TrackOption) (*Track, error) {
+func CreateTrack(ctx context.Context, id string, peerConnection *webrtc.PeerConnection, options ...TrackOption) (*Track, error) {
 	var err error
-	track := &Track{ctx: ctx}
+	track := &Track{ctx: ctx, rtcCapability: &webrtc.RTPCodecCapability{}}
 
 	for _, option := range options {
 		if err := option(track); err != nil {
 			return nil, err
 		}
+	}
+
+	if track.track, err = webrtc.NewTrackLocalStaticSample(*track.rtcCapability, id, "webrtc"); err != nil {
+		return nil, err
 	}
 
 	if track.rtpSender, err = peerConnection.AddTrack(track.track); err != nil {
