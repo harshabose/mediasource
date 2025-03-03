@@ -8,9 +8,8 @@ import (
 )
 
 type Tracks struct {
-	bwEstimator *bandwidthEstimator
-	tracks      map[string]*Track
-	ctx         context.Context
+	tracks map[string]*Track
+	ctx    context.Context
 }
 
 func CreateTracks(ctx context.Context, options ...TracksOption) (*Tracks, error) {
@@ -33,9 +32,7 @@ func (tracks *Tracks) CreateTrack(label string, peerConnection *webrtc.PeerConne
 		track *Track
 		err   error
 	)
-	// if track, err = CreateTrack(tracks.ctx, peerConnection, append(options, withBandwidthControl(tracks.bwEstimator))...); err != nil {
-	// 	return nil, err
-	// }
+
 	if track, err = CreateTrack(tracks.ctx, label, peerConnection, options...); err != nil {
 		return nil, err
 	}
@@ -58,9 +55,6 @@ func (tracks *Tracks) GetTrack(id string) (*Track, error) {
 func (tracks *Tracks) StartTrack(id string) {
 	if track, ok := tracks.tracks[id]; ok {
 		track.Start()
-	}
-	if tracks.bwEstimator != nil {
-		tracks.bwEstimator.Start()
 	}
 }
 

@@ -46,6 +46,10 @@ func (track *Track) GetTrack() *webrtc.TrackLocalStaticSample {
 	return track.track
 }
 
+func (track *Track) GetPriority() Priority {
+	return track.priority
+}
+
 func (track *Track) Start() {
 	if track.track == nil {
 		fmt.Println("no remote track set yet. Skipping...")

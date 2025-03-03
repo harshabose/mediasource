@@ -97,6 +97,13 @@ func WithPriority(level Priority) TrackOption {
 	}
 }
 
+func WithBitrateControl(channel chan int64) TrackOption {
+	return func(track *Track) error {
+		track.stream.encoder.SetBitrateChannel(channel)
+		return nil
+	}
+}
+
 type Priority uint8
 
 const (
@@ -107,9 +114,3 @@ const (
 	Level4 Priority = 4
 	Level5 Priority = 5
 )
-
-func withBandwidthControl(estimator *bandwidthEstimator) TrackOption {
-	return func(track *Track) error {
-		return estimator.SetConsumer(track.track.ID(), track.stream.encoder.SetBitrateChannel, track)
-	}
-}
