@@ -84,8 +84,11 @@ func WithStream(options ...StreamOption) TrackOption {
 		spsBase64 := base64.StdEncoding.EncodeToString(sps)
 		ppsBase64 := base64.StdEncoding.EncodeToString(pps)
 
+		fmt.Printf("SPS and PPS in base64 encoding: %s; %s\n", spsBase64, ppsBase64)
+
 		track.rtcCapability.SDPFmtpLine = track.rtcCapability.SDPFmtpLine + fmt.Sprintf(";sprop-parameter-sets=%s,%s", spsBase64, ppsBase64)
 
+		fmt.Println(track.rtcCapability.SDPFmtpLine)
 		return nil
 	}
 }

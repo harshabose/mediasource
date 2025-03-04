@@ -79,7 +79,6 @@ loop:
 				continue loop
 			}
 			track.stream.PutBack(sample)
-			fmt.Println("send samples to remote")
 		}
 	}
 }
