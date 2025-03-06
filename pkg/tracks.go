@@ -40,6 +40,7 @@ func (tracks *Tracks) CreateTrack(label string, peerConnection *webrtc.PeerConne
 		return nil, errors.New("track already exists")
 	}
 	tracks.tracks[track.track.ID()] = track
+
 	return track, nil
 }
 

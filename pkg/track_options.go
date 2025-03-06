@@ -44,7 +44,7 @@ func WithH264Track(clockrate uint32, packetisationMode PacketisationMode, profil
 		track.rtcCapability.Channels = 0
 		track.rtcCapability.RTCPFeedback = []webrtc.RTCPFeedback{}
 		track.rtcCapability.SDPFmtpLine = track.rtcCapability.SDPFmtpLine + fmt.Sprintf("level-asymmetry-allowed=1;packetization-mode=%d;profile-level-id=%s", packetisationMode, profileLevel)
-
+		fmt.Println("set h264 track details")
 		return nil
 	}
 }
@@ -77,9 +77,11 @@ func WithOpusTrack(id string, samplerate uint32, channelLayout uint16, stereo St
 func WithStream(options ...StreamOption) TrackOption {
 	return func(track *Track) error {
 		var err error
+		fmt.Println("trying to create stream")
 		if track.stream, err = CreateStream(track.ctx, options...); err != nil {
 			return err
 		}
+		fmt.Println("trying to create stream")
 		sps, pps := track.stream.encoder.GetParameterSets()
 		spsBase64 := base64.StdEncoding.EncodeToString(sps)
 		ppsBase64 := base64.StdEncoding.EncodeToString(pps)
@@ -88,7 +90,7 @@ func WithStream(options ...StreamOption) TrackOption {
 
 		track.rtcCapability.SDPFmtpLine = track.rtcCapability.SDPFmtpLine + fmt.Sprintf(";sprop-parameter-sets=%s,%s", spsBase64, ppsBase64)
 
-		fmt.Println(track.rtcCapability.SDPFmtpLine)
+		fmt.Println("set stream")
 		return nil
 	}
 }
@@ -96,6 +98,7 @@ func WithStream(options ...StreamOption) TrackOption {
 func WithPriority(level Priority) TrackOption {
 	return func(track *Track) error {
 		track.priority = level
+		fmt.Println("set stream priority")
 		return nil
 	}
 }
