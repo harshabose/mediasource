@@ -6,9 +6,10 @@ import (
 	"time"
 
 	"github.com/asticode/go-astiav"
+	"github.com/pion/webrtc/v4/pkg/media"
+
 	"github.com/harshabose/simple_webrtc_comm/transcode/pkg"
 	"github.com/harshabose/tools/buffer/pkg"
-	"github.com/pion/webrtc/v4/pkg/media"
 
 	"github.com/harshabose/simple_webrtc_comm/mediasource/internal"
 )
