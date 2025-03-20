@@ -1,6 +1,8 @@
 package mediasource
 
 import (
+	"fmt"
+
 	"github.com/asticode/go-astiav"
 
 	"github.com/harshabose/simple_webrtc_comm/transcode/pkg"
@@ -24,6 +26,7 @@ func WithDemuxer(containerAddress string, options ...transcode.DemuxerOption) St
 		if stream.demuxer, err = transcode.CreateDemuxer(stream.ctx, containerAddress, options...); err != nil {
 			return err
 		}
+		fmt.Println("created demuxer")
 		return nil
 	}
 }
@@ -34,6 +37,7 @@ func WithDecoder(options ...transcode.DecoderOption) StreamOption {
 		if stream.decoder, err = transcode.CreateDecoder(stream.ctx, stream.demuxer, options...); err != nil {
 			return err
 		}
+		fmt.Println("created decoder")
 		return nil
 	}
 }
@@ -44,6 +48,7 @@ func WithFilter(filterConfig *transcode.FilterConfig, options ...transcode.Filte
 		if stream.filter, err = transcode.CreateFilter(stream.ctx, stream.decoder, filterConfig, options...); err != nil {
 			return err
 		}
+		fmt.Println("created filter")
 		return nil
 	}
 }
@@ -54,6 +59,7 @@ func WithEncoder(codec astiav.CodecID, options ...transcode.EncoderOption) Strea
 		if stream.encoder, err = transcode.CreateEncoder(stream.ctx, codec, stream.filter, options...); err != nil {
 			return err
 		}
+		fmt.Println("created encoder")
 		return nil
 	}
 }

@@ -99,8 +99,8 @@ func (stream *Stream) packetToSample(packet *astiav.Packet) *media.Sample {
 
 	sample.Data = packet.Data()
 	sample.Timestamp = time.Now().UTC()
-	sample.Duration = time.Second / stream.encoder.GetDuration()
-	sample.PacketTimestamp = uint32(float64(packet.Pts()) * (stream.encoder.GetVideoTimeBase().Float64()) * float64(time.Second))
+	sample.Duration = stream.encoder.GetDuration()
+	sample.PacketTimestamp = uint32(float64(packet.Pts()) * (stream.encoder.GetTimeBase().Float64()) * float64(time.Second))
 	sample.PrevDroppedPackets = 0
 	sample.Metadata = nil
 	sample.RTPHeaders = nil

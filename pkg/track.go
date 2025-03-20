@@ -78,6 +78,7 @@ loop:
 				track.stream.PutBack(sample)
 				continue loop
 			}
+			fmt.Println("wrote media data")
 			track.stream.PutBack(sample)
 		}
 	}
