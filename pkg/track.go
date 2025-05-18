@@ -58,6 +58,7 @@ func (track *Track) Start() {
 
 	track.stream.Start()
 	go track.loop()
+	go track.rtpSenderLoop()
 	fmt.Println("media source track started")
 }
 
@@ -80,6 +81,16 @@ loop:
 			}
 			fmt.Println("wrote media data")
 			track.stream.PutBack(sample)
+		}
+	}
+}
+
+func (track *Track) rtpSenderLoop() {
+	rtcpBuffer := make([]byte, 1500)
+	for {
+		if _, _, err := track.rtpSender.Read(rtcpBuffer); err != nil {
+			fmt.Println("error while reading rtcp packets; err: ", err.Error())
+			return
 		}
 	}
 }

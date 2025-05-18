@@ -42,8 +42,7 @@ func WithH264Track(clockrate uint32, packetisationMode PacketisationMode, profil
 		track.rtcCapability.MimeType = webrtc.MimeTypeH264
 		track.rtcCapability.ClockRate = clockrate
 		track.rtcCapability.Channels = 0
-		track.rtcCapability.RTCPFeedback = []webrtc.RTCPFeedback{}
-		track.rtcCapability.SDPFmtpLine = track.rtcCapability.SDPFmtpLine + fmt.Sprintf("level-asymmetry-allowed=1;packetization-mode=%d;profile-level-id=%s", packetisationMode, profileLevel)
+		// track.rtcCapability.SDPFmtpLine = track.rtcCapability.SDPFmtpLine + fmt.Sprintf("level-asymmetry-allowed=1;packetization-mode=%d;profile-level-id=%s", packetisationMode, profileLevel)
 
 		return nil
 	}
@@ -62,7 +61,7 @@ func WithOpusTrack(samplerate uint32, channelLayout uint16, stereo StereoType) T
 		track.rtcCapability.MimeType = webrtc.MimeTypeOpus
 		track.rtcCapability.ClockRate = samplerate
 		track.rtcCapability.Channels = channelLayout
-		track.rtcCapability.SDPFmtpLine = track.rtcCapability.SDPFmtpLine + fmt.Sprintf("minptime=10;useinbandfec=1;stereo=%d", stereo)
+		// track.rtcCapability.SDPFmtpLine = track.rtcCapability.SDPFmtpLine + fmt.Sprintf("minptime=10;useinbandfec=1;stereo=%d", stereo)
 
 		return nil
 	}
