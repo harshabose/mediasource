@@ -56,7 +56,7 @@ func WithFilter(filterConfig *transcode.FilterConfig, options ...transcode.Filte
 func WithEncoder(codec astiav.CodecID, options ...transcode.EncoderOption) StreamOption {
 	return func(stream *Stream) error {
 		var err error
-		if stream.encoder, err = transcode.CreateEncoder(stream.ctx, codec, stream.filter, options...); err != nil {
+		if stream.encoder, err = transcode.NewEncoder(stream.ctx, codec, stream.filter, options...); err != nil {
 			return err
 		}
 		fmt.Println("created encoder")
