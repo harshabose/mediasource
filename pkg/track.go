@@ -89,7 +89,13 @@ loop:
 }
 
 func (track *Track) rtpSenderLoop() {
-	readRTCPWithAnalysis(track.rtpSender)
+	// readRTCPWithAnalysis(track.rtpSender)
+	for {
+		rtcpBuf := make([]byte, 1500)
+		if _, _, err := track.rtpSender.Read(rtcpBuf); err != nil {
+			fmt.Printf("error while reading rtcp packets")
+		}
+	}
 }
 
 // Enhanced RTCP reader that parses and analyzes TWCC feedback

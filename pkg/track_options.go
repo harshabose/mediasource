@@ -1,7 +1,6 @@
 package mediasource
 
 import (
-	"encoding/base64"
 	"fmt"
 
 	"github.com/pion/webrtc/v4"
@@ -48,6 +47,16 @@ func WithH264Track(clockrate uint32, packetisationMode PacketisationMode, profil
 	}
 }
 
+func WithVP8Track(clockrate uint32) TrackOption {
+	return func(track *Track) error {
+		track.rtcCapability.MimeType = webrtc.MimeTypeVP8
+		track.rtcCapability.ClockRate = clockrate
+		track.rtcCapability.Channels = 0
+
+		return nil
+	}
+}
+
 type StereoType uint8
 
 const (
@@ -75,13 +84,13 @@ func WithStream(options ...StreamOption) TrackOption {
 			return err
 		}
 		fmt.Println("trying to create stream")
-		sps, pps := track.stream.encoder.GetParameterSets()
-		spsBase64 := base64.StdEncoding.EncodeToString(sps)
-		ppsBase64 := base64.StdEncoding.EncodeToString(pps)
-
-		fmt.Printf("SPS and PPS in base64 encoding: %s; %s\n", spsBase64, ppsBase64)
-
-		track.rtcCapability.SDPFmtpLine = track.rtcCapability.SDPFmtpLine + fmt.Sprintf(";sprop-parameter-sets=%s,%s", spsBase64, ppsBase64)
+		// sps, pps := track.stream.encoder.GetParameterSets()
+		// spsBase64 := base64.StdEncoding.EncodeToString(sps)
+		// ppsBase64 := base64.StdEncoding.EncodeToString(pps)
+		//
+		// fmt.Printf("SPS and PPS in base64 encoding: %s; %s\n", spsBase64, ppsBase64)
+		//
+		// track.rtcCapability.SDPFmtpLine = track.rtcCapability.SDPFmtpLine + fmt.Sprintf(";sprop-parameter-sets=%s,%s", spsBase64, ppsBase64)
 
 		fmt.Println("set stream")
 		return nil
