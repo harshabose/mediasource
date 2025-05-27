@@ -15,18 +15,15 @@ import (
 )
 
 type Stream struct {
-	demuxer *transcode.Demuxer
-	decoder *transcode.Decoder
-	filter  *transcode.Filter
-	encoder *transcode.Encoder
-	buffer  buffer.BufferWithGenerator[media.Sample]
-	ctx     context.Context
+	transcoder transcode.CanProduceMediaPacket
+	buffer     buffer.BufferWithGenerator[media.Sample]
+	ctx        context.Context
 }
 
 func CreateStream(ctx context.Context, options ...StreamOption) (*Stream, error) {
 	var (
 		err    error
-		stream *Stream = &Stream{ctx: ctx}
+		stream = &Stream{ctx: ctx}
 	)
 
 	for _, option := range options {
@@ -43,10 +40,6 @@ func CreateStream(ctx context.Context, options ...StreamOption) (*Stream, error)
 }
 
 func (stream *Stream) Start() {
-	stream.demuxer.Start()
-	stream.decoder.Start()
-	stream.filter.Start()
-	stream.encoder.Start()
 	go stream.loop()
 	fmt.Println("media source stream started")
 }
@@ -61,18 +54,22 @@ func (stream *Stream) loop() {
 		select {
 		case <-stream.ctx.Done():
 			return
-		case packet = <-stream.encoder.WaitForPacket():
+		case packet = <-stream.transcoder.WaitForPacket():
 			if err = stream.pushSample(stream.packetToSample(packet)); err != nil {
-				stream.encoder.PutBack(packet)
+				stream.transcoder.PutBack(packet)
 				continue
 			}
 
-			stream.encoder.PutBack(packet)
+			stream.transcoder.PutBack(packet)
 		}
 	}
 }
 
 func (stream *Stream) pushSample(sample *media.Sample) error {
+	if sample == nil {
+		fmt.Println("got nil sample skipping")
+		return nil
+	}
 	ctx, cancel := context.WithTimeout(stream.ctx, time.Second)
 	defer cancel()
 
@@ -95,15 +92,18 @@ func (stream *Stream) WaitForSample() chan *media.Sample {
 }
 
 func (stream *Stream) packetToSample(packet *astiav.Packet) *media.Sample {
+	if packet == nil {
+		fmt.Println("🚨 ERROR: Received nil packet")
+		return nil
+	}
+
+	// fmt.Printf("📦 Processing packet: ptr=%p\n", packet)
+
 	sample := stream.buffer.Generate()
 
 	sample.Data = packet.Data()
 	sample.Timestamp = time.Now().UTC()
 	sample.Duration = time.Duration(packet.Duration())
-	// sample.PacketTimestamp = uint32(float64(packet.Pts()) * (stream.encoder.GetTimeBase().Float64()) * float64(time.Second))
-	// sample.PrevDroppedPackets = 0
-	// sample.Metadata = nil
-	// sample.RTPHeaders = nil
 
 	return sample
 }

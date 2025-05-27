@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/pion/webrtc/v4"
+
+	transcode "github.com/harshabose/simple_webrtc_comm/transcode/pkg"
 )
 
 type PacketisationMode uint8
@@ -41,6 +43,7 @@ func WithH264Track(clockrate uint32, packetisationMode PacketisationMode, profil
 		track.rtcCapability.MimeType = webrtc.MimeTypeH264
 		track.rtcCapability.ClockRate = clockrate
 		track.rtcCapability.Channels = 0
+		// NOTE: NOT NEEDED
 		// track.rtcCapability.SDPFmtpLine = track.rtcCapability.SDPFmtpLine + fmt.Sprintf("level-asymmetry-allowed=1;packetization-mode=%d;profile-level-id=%s", packetisationMode, profileLevel)
 
 		return nil
@@ -70,6 +73,7 @@ func WithOpusTrack(samplerate uint32, channelLayout uint16, stereo StereoType) T
 		track.rtcCapability.MimeType = webrtc.MimeTypeOpus
 		track.rtcCapability.ClockRate = samplerate
 		track.rtcCapability.Channels = channelLayout
+		// NOTE: NOT NEEDED
 		// track.rtcCapability.SDPFmtpLine = track.rtcCapability.SDPFmtpLine + fmt.Sprintf("minptime=10;useinbandfec=1;stereo=%d", stereo)
 
 		return nil
@@ -84,6 +88,7 @@ func WithStream(options ...StreamOption) TrackOption {
 			return err
 		}
 		fmt.Println("trying to create stream")
+		// NOTE: NOT NEEDED
 		// sps, pps := track.stream.encoder.GetParameterSets()
 		// spsBase64 := base64.StdEncoding.EncodeToString(sps)
 		// ppsBase64 := base64.StdEncoding.EncodeToString(pps)
@@ -105,13 +110,6 @@ func WithPriority(level Priority) TrackOption {
 	}
 }
 
-func WithBitrateControl(channel chan int64) TrackOption {
-	return func(track *Track) error {
-		track.stream.encoder.SetBitrateChannel(channel)
-		return nil
-	}
-}
-
 type Priority uint8
 
 const (
@@ -122,3 +120,12 @@ const (
 	Level4 Priority = 4
 	Level5 Priority = 5
 )
+
+func WithBitrateControl(track *Track) (transcode.CanGetUpdateBitrateCallBack, error) {
+	f, ok := track.stream.transcoder.(transcode.CanGetUpdateBitrateCallBack)
+	if !ok {
+		return nil, transcode.ErrorInterfaceMismatch
+	}
+
+	return f, nil
+}
