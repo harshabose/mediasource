@@ -54,7 +54,12 @@ func (stream *Stream) loop() {
 		select {
 		case <-stream.ctx.Done():
 			return
-		case packet = <-stream.transcoder.WaitForPacket():
+		default:
+			packet, err = stream.getPacket()
+			if err != nil {
+				// fmt.Println("unable to get packet from transcoder; err:", err.Error())
+				continue
+			}
 			if err = stream.pushSample(stream.packetToSample(packet)); err != nil {
 				stream.transcoder.PutBack(packet)
 				continue
@@ -76,8 +81,15 @@ func (stream *Stream) pushSample(sample *media.Sample) error {
 	return stream.buffer.Push(ctx, sample)
 }
 
+func (stream *Stream) getPacket() (*astiav.Packet, error) {
+	ctx, cancel := context.WithTimeout(stream.ctx, 50*time.Millisecond)
+	defer cancel()
+
+	return stream.transcoder.GetPacket(ctx)
+}
+
 func (stream *Stream) GetSample() (*media.Sample, error) {
-	ctx, cancel := context.WithTimeout(stream.ctx, time.Second)
+	ctx, cancel := context.WithTimeout(stream.ctx, 50*time.Millisecond)
 	defer cancel()
 
 	return stream.buffer.Pop(ctx)
@@ -96,8 +108,6 @@ func (stream *Stream) packetToSample(packet *astiav.Packet) *media.Sample {
 		fmt.Println("🚨 ERROR: Received nil packet")
 		return nil
 	}
-
-	// fmt.Printf("📦 Processing packet: ptr=%p\n", packet)
 
 	sample := stream.buffer.Generate()
 
