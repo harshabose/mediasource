@@ -17,7 +17,11 @@ import (
 type Stream struct {
 	transcoder transcode.CanProduceMediaPacket
 	buffer     buffer.BufferWithGenerator[media.Sample]
-	ctx        context.Context
+
+	frameCount int
+	startTime  time.Time
+
+	ctx context.Context
 }
 
 func CreateStream(ctx context.Context, options ...StreamOption) (*Stream, error) {
@@ -49,12 +53,14 @@ func (stream *Stream) loop() {
 		packet *astiav.Packet
 		err    error
 	)
+	ticker := time.NewTicker(40 * time.Millisecond)
+	defer ticker.Stop()
 
 	for {
 		select {
 		case <-stream.ctx.Done():
 			return
-		default:
+		case <-ticker.C:
 			packet, err = stream.getPacket()
 			if err != nil {
 				// fmt.Println("unable to get packet from transcoder; err:", err.Error())
@@ -110,10 +116,22 @@ func (stream *Stream) packetToSample(packet *astiav.Packet) *media.Sample {
 	}
 
 	sample := stream.buffer.Generate()
-
 	sample.Data = packet.Data()
-	sample.Timestamp = time.Now().UTC()
-	sample.Duration = time.Duration(packet.Duration())
+
+	// Initialize on first packet
+	if stream.frameCount == 0 {
+		stream.startTime = time.Now().UTC()
+	}
+
+	stream.frameCount++
+
+	// Calculate expected timestamp for this frame number
+	frameDuration := time.Second / time.Duration(25)
+	expectedTimestamp := stream.startTime.Add(time.Duration(stream.frameCount-1) * frameDuration)
+
+	// Use expected timestamp (not real-time) for consistent spacing
+	sample.Timestamp = expectedTimestamp
+	sample.Duration = frameDuration
 
 	return sample
 }
